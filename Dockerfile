@@ -29,10 +29,10 @@ RUN [ "yum", "install", "sysstat.x86_64",             "-y" ]
 RUN [ "yum", "install", "wget",                       "-y" ]
 
 # DANJNG
-RUN rngd -r /dev/urandom -o /dev/random -t 1 && \
- echo 'EXTRAOPTIONS="-r /dev/urandom -o /dev/random -t 1"' >> /etc/sysconfig/rngd && \
- chkconfig rngd on && \
- service rngd start
+#RUN rngd -r /dev/urandom -o /dev/random -t 1 && \
+# echo 'EXTRAOPTIONS="-r /dev/urandom -o /dev/random -t 1"' >> /etc/sysconfig/rngd && \
+# chkconfig rngd on && \
+# service rngd start
 
 # Java Download location. Note the build number is in the URL.
 # http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
