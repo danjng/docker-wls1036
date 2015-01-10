@@ -28,12 +28,21 @@ RUN [ "yum", "install", "redhat-lsb-core.x86_64",     "-y" ]
 RUN [ "yum", "install", "sysstat.x86_64",             "-y" ]
 RUN [ "yum", "install", "wget",                       "-y" ]
 
+# DANJNG
+RUN rngd -r /dev/urandom -o /dev/random -t 1 && \
+ echo 'EXTRAOPTIONS="-r /dev/urandom -o /dev/random -t 1"' >> /etc/sysconfig/rngd && \
+ chkconfig rngd on && \
+ service rngd start
+
 # Java Download location. Note the build number is in the URL.
 # http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
 ENV JAVA_MINOR_VERSION 71
 ENV JAVA_BUILD_NUMBER  14
 ENV JAVA_HOME          /usr/java/jdk1.7.0_$JAVA_MINOR_VERSION
 ENV PATH               JAVA_HOME/bin:$PATH
+
+# DANJNG
+#RUN mkdir -p /u02/app/oracle/product/fmw
 
 # Install Java JDK without leaving behind temporary files
 # Following lines commented out so as to reduce download; file has been downloaded to current directory; 
@@ -54,12 +63,12 @@ RUN rpm -ivh jdk-7u$JAVA_MINOR_VERSION-linux-x64.rpm && \
 RUN groupadd dba      -g 502 && \
     groupadd oinstall -g 501 && \
     useradd -m        -u 501 -g oinstall -G dba -d /home/oracle -s /sbin/nologin -c "Oracle Account" oracle && \
-    mkdir -p /u01/app/oracle && \
+    mkdir -p /u02/app/oracle && \
     chown -R oracle:oinstall /home/oracle && \
-    chown -R oracle:oinstall /u01/app/oracle
+    chown -R oracle:oinstall /u02/app/oracle
 
 # Install Weblogic 11gR1 10.3.6 Generic
-ADD silent.xml          /u01/app/oracle/
+ADD silent.xml          /u02/app/oracle/
 # ADD wls1036_generic.jar /u01/app/oracle/
 # RUN [ "java","-Dspace.detection=false", "-Xmx1024m", "-jar", "/u01/app/oracle/wls1036_generic.jar", "-mode=silent", "-silent_xml=/u01/app/oracle/silent.xml" ]
 # RUN rm wls1036_generic.jar
@@ -76,21 +85,33 @@ USER oracle
 #  Comment out the 'ADD' statement 
 #RUN curl http://web.unbc.ca/~fuson/docker/wls1036_generic.jar > /u01/app/oracle/wls1036_generic.jar;\
 
-#RUN wget --no-check-certificate --content-disposition "https://googledrive.com/host/0B8N4NF6Fi1ZuWFhwdE02U0s3WVk" -O /u01/app/oracle/wls1036_generic.jar
+#RUN wget --no-check-certificate --content-disposition "https://googledrive.com/host/0B8N4NF6Fi1ZuWFhwdE02U0s3WVk" -O /u02/app/oracle/wls1036_generic.jar
 
-ADD wls1036_generic.jar /u01/app/oracle/wls1036_generic.jar
-RUN downloaded_weblogic_sha1sum=$(sha1sum /u01/app/oracle/wls1036_generic.jar);\
-    expected_weblogic_sha1sum="ffbc529d598ee4bcd1e8104191c22f1c237b4a3e  /u01/app/oracle/wls1036_generic.jar";\
+ADD wls1036_generic.jar /u02/app/oracle/wls1036_generic.jar
+RUN downloaded_weblogic_sha1sum=$(sha1sum /u02/app/oracle/wls1036_generic.jar);\
+    expected_weblogic_sha1sum="ffbc529d598ee4bcd1e8104191c22f1c237b4a3e  /u02/app/oracle/wls1036_generic.jar";\
     if [ "$expected_weblogic_sha1sum" == "$downloaded_weblogic_sha1sum" ];\
        then \
          echo "Checksum Passed, okay to install"       1>&2;\
          echo "Expected: $expected_weblogic_sha1sum"   1>&2;\
          echo "Download: $downloaded_weblogic_sha1sum" 1>&2;\
-         java -Dspace.detection=false -Xmx1024m -jar /u01/app/oracle/wls1036_generic.jar -mode=silent -silent_xml=/u01/app/oracle/silent.xml;\
+         java -d64 -Dspace.detection=false -Xmx1024m -jar /u01/app/oracle/wls1036_generic.jar -mode=silent -silent_xml=/u02/app/oracle/silent.xml;\
        else \
          echo "Expected: $expected_weblogic_sha1sum"   1>&2;\
          echo "Download: $downloaded_weblogic_sha1sum" 1>&2;\
          echo "Checksum Failed"                        1>&2;\
          exit 1 ;\
     fi;\
-    rm /u01/app/oracle/wls1036_generic.jar
+    rm /u02/app/oracle/wls1036_generic.jar
+
+# Install Oracle ADF
+ADD adf_silent.rsp /u02/app/oracle
+ADD ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip
+RUN mkdir -p /tmp/adf && \
+ unzip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip -d /tmp/adf && \
+ cd /tmp/adf && \
+ ./runInstaller -silent -response /u02/app/oracle/adf_silent.rsp && \
+ rm /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip
+
+# Install Oracle HTTP Server
+ADD 
