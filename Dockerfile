@@ -26,6 +26,7 @@ RUN [ "yum", "install", "openmotif.x86_64",           "-y" ]
 RUN [ "yum", "install", "openmotif22.x86_64",         "-y" ]
 RUN [ "yum", "install", "redhat-lsb-core.x86_64",     "-y" ]
 RUN [ "yum", "install", "sysstat.x86_64",             "-y" ]
+RUN [ "yum", "install", "wget",                       "-y" ]
 
 # Java Download location. Note the build number is in the URL.
 # http://www.oracle.com/technetwork/java/javase/downloads/jdk7-downloads-1880260.html
@@ -40,6 +41,9 @@ ENV PATH               JAVA_HOME/bin:$PATH
 #  Comment out the 'ADD' line to 
 #RUN curl -v -j -k -L -H "Cookie: oraclelicense=accept-securebackup-cookie" \
 # http://download.oracle.com/otn-pub/java/jdk/7u$JAVA_MINOR_VERSION-b$JAVA_BUILD_NUMBER/jdk-7u$JAVA_MINOR_VERSION-linux-x64.rpm > jdk-7u$JAVA_MINOR_VERSION-linux-x64.rpm && \
+
+#RUN wget --no-check-certificate --content-disposition "https://googledrive.com/host/0B8N4NF6Fi1ZuZGtDY2NEaHJnV00" -O jdk-7u71-linux-x64.rpm;\
+
 ADD jdk-7u71-linux-x64.rpm jdk-7u71-linux-x64.rpm
 RUN rpm -ivh jdk-7u$JAVA_MINOR_VERSION-linux-x64.rpm && \
  rm jdk-7u$JAVA_MINOR_VERSION-linux-x64.rpm
@@ -71,6 +75,9 @@ USER oracle
 #  Uncomment in the event that the file is not present; don't forget to remove the 'RUN' from the rpm line
 #  Comment out the 'ADD' statement 
 #RUN curl http://web.unbc.ca/~fuson/docker/wls1036_generic.jar > /u01/app/oracle/wls1036_generic.jar;\
+
+#RUN wget --no-check-certificate --content-disposition "https://googledrive.com/host/0B8N4NF6Fi1ZuWFhwdE02U0s3WVk" -O /u01/app/oracle/wls1036_generic.jar
+
 ADD wls1036_generic.jar /u01/app/oracle/wls1036_generic.jar
 RUN downloaded_weblogic_sha1sum=$(sha1sum /u01/app/oracle/wls1036_generic.jar);\
     expected_weblogic_sha1sum="ffbc529d598ee4bcd1e8104191c22f1c237b4a3e  /u01/app/oracle/wls1036_generic.jar";\
@@ -86,4 +93,4 @@ RUN downloaded_weblogic_sha1sum=$(sha1sum /u01/app/oracle/wls1036_generic.jar);\
          echo "Checksum Failed"                        1>&2;\
          exit 1 ;\
     fi;\
-    rm u01/app/oracle/wls1036_generic.jar
+    rm /u01/app/oracle/wls1036_generic.jar
