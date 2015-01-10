@@ -26,6 +26,7 @@ RUN [ "yum", "install", "openmotif.x86_64",           "-y" ]
 RUN [ "yum", "install", "openmotif22.x86_64",         "-y" ]
 RUN [ "yum", "install", "redhat-lsb-core.x86_64",     "-y" ]
 RUN [ "yum", "install", "sysstat.x86_64",             "-y" ]
+RUN [ "yum", "install", "unzip",                      "-y" ]
 RUN [ "yum", "install", "wget",                       "-y" ]
 
 # DANJNG
@@ -68,7 +69,7 @@ RUN groupadd dba      -g 502 && \
     chown -R oracle:oinstall /u02/app/oracle
 
 # Install Weblogic 11gR1 10.3.6 Generic
-ADD silent.xml          /u02/app/oracle/
+ADD silent.xml          /u02/app/oracle/silent.xml
 # ADD wls1036_generic.jar /u01/app/oracle/
 # RUN [ "java","-Dspace.detection=false", "-Xmx1024m", "-jar", "/u01/app/oracle/wls1036_generic.jar", "-mode=silent", "-silent_xml=/u01/app/oracle/silent.xml" ]
 # RUN rm wls1036_generic.jar
@@ -95,7 +96,7 @@ RUN downloaded_weblogic_sha1sum=$(sha1sum /u02/app/oracle/wls1036_generic.jar);\
          echo "Checksum Passed, okay to install"       1>&2;\
          echo "Expected: $expected_weblogic_sha1sum"   1>&2;\
          echo "Download: $downloaded_weblogic_sha1sum" 1>&2;\
-         java -d64 -Dspace.detection=false -Xmx1024m -jar /u01/app/oracle/wls1036_generic.jar -mode=silent -silent_xml=/u02/app/oracle/silent.xml;\
+         java -d64 -Dspace.detection=false -Xmx1024m -jar /u02/app/oracle/wls1036_generic.jar -mode=silent -silent_xml=/u02/app/oracle/silent.xml;\
        else \
          echo "Expected: $expected_weblogic_sha1sum"   1>&2;\
          echo "Download: $downloaded_weblogic_sha1sum" 1>&2;\
@@ -105,7 +106,7 @@ RUN downloaded_weblogic_sha1sum=$(sha1sum /u02/app/oracle/wls1036_generic.jar);\
     rm /u02/app/oracle/wls1036_generic.jar
 
 # Install Oracle ADF
-ADD adf_silent.rsp /u02/app/oracle
+ADD adf_silent.rsp /u02/app/oracle/adf_silent.rsp
 ADD ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip
 RUN mkdir -p /tmp/adf && \
  unzip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip -d /tmp/adf && \
@@ -115,7 +116,7 @@ RUN mkdir -p /tmp/adf && \
  rm -r /tmp/adf
 
 # Install Oracle HTTP Server
-ADD ohs_silent.rsp /u02/app/oracle
+ADD ohs_silent.rsp /u02/app/oracle/ohs_silent.rsp
 ADD ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip
 RUN mkdir -p /tmp/ohs && \
  unzip /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip -d /tmp/ohs && \
@@ -124,4 +125,3 @@ RUN mkdir -p /tmp/ohs && \
  rm /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip && \
  rm -r /tmp/ohs
 
- 
