@@ -111,7 +111,17 @@ RUN mkdir -p /tmp/adf && \
  unzip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip -d /tmp/adf && \
  cd /tmp/adf && \
  ./runInstaller -silent -response /u02/app/oracle/adf_silent.rsp && \
- rm /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip
+ rm /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip && \
+ rm -r /tmp/adf
 
 # Install Oracle HTTP Server
-ADD 
+ADD ohs_silent.rsp /u02/app/oracle
+ADD ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip
+RUN mkdir -p /tmp/ohs && \
+ unzip /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip -d /tmp/ohs && \
+ cd /tmp/ohs && \
+ ./runInstaller -silent -responseFile /u02/app/oracle/ohs_silent.rsp && \
+ rm /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip && \
+ rm -r /tmp/ohs
+
+ 
