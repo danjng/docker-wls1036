@@ -52,9 +52,9 @@ ENV PATH               JAVA_HOME/bin:$PATH
 #RUN curl -v -j -k -L -H "Cookie: oraclelicense=accept-securebackup-cookie" \
 # http://download.oracle.com/otn-pub/java/jdk/7u$JAVA_MINOR_VERSION-b$JAVA_BUILD_NUMBER/jdk-7u$JAVA_MINOR_VERSION-linux-x64.rpm > jdk-7u$JAVA_MINOR_VERSION-linux-x64.rpm && \
 
-#RUN wget --no-check-certificate --content-disposition "https://googledrive.com/host/0B8N4NF6Fi1ZuZGtDY2NEaHJnV00" -O jdk-7u71-linux-x64.rpm;\
+RUN wget --no-check-certificate --content-disposition "https://googledrive.com/host/0B8N4NF6Fi1ZuZGtDY2NEaHJnV00" -O jdk-7u71-linux-x64.rpm
+#ADD jdk-7u71-linux-x64.rpm jdk-7u71-linux-x64.rpm
 
-ADD jdk-7u71-linux-x64.rpm jdk-7u71-linux-x64.rpm
 RUN rpm -ivh jdk-7u$JAVA_MINOR_VERSION-linux-x64.rpm && \
  rm jdk-7u$JAVA_MINOR_VERSION-linux-x64.rpm
 
@@ -86,9 +86,9 @@ USER oracle
 #  Comment out the 'ADD' statement 
 #RUN curl http://web.unbc.ca/~fuson/docker/wls1036_generic.jar > /u01/app/oracle/wls1036_generic.jar;\
 
-#RUN wget --no-check-certificate --content-disposition "https://googledrive.com/host/0B8N4NF6Fi1ZuWFhwdE02U0s3WVk" -O /u02/app/oracle/wls1036_generic.jar
+RUN wget --no-check-certificate --content-disposition "https://googledrive.com/host/0B8N4NF6Fi1ZuWFhwdE02U0s3WVk" -O /u02/app/oracle/wls1036_generic.jar
+#ADD wls1036_generic.jar /u02/app/oracle/wls1036_generic.jar
 
-ADD wls1036_generic.jar /u02/app/oracle/wls1036_generic.jar
 RUN downloaded_weblogic_sha1sum=$(sha1sum /u02/app/oracle/wls1036_generic.jar);\
     expected_weblogic_sha1sum="ffbc529d598ee4bcd1e8104191c22f1c237b4a3e  /u02/app/oracle/wls1036_generic.jar";\
     if [ "$expected_weblogic_sha1sum" == "$downloaded_weblogic_sha1sum" ];\
@@ -108,14 +108,17 @@ RUN downloaded_weblogic_sha1sum=$(sha1sum /u02/app/oracle/wls1036_generic.jar);\
 # Install Oracle ADF
 ADD adf_silent.rsp /u02/app/oracle/adf_silent.rsp
 ADD createCentralInventory.sh /u02/app/oracle/createCentralInventory.sh
-ADD ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip
+
+RUN wget --no-check-certificate --content-disposition "https://googledrive.com/host/0B8N4NF6Fi1ZudFVXY0N5cTRYa28" -O /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip
+#ADD ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip
+
 USER root
 RUN mkdir /u01 && \
+ mkdir -p /u03/app/oracle/config/{domains,applications} && \
  chmod 755 /u02/app/oracle/createCentralInventory.sh && \
  /u02/app/oracle/createCentralInventory.sh /u01/oraInventory oinstall
 USER oracle
 RUN mkdir -p /tmp/adf && \
- mkdir -p /u03/app/oracle/config/{domains,applications}
  unzip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip -d /tmp/adf && \
  cd /tmp/adf/Disk1 && \
  ./runInstaller -silent -response /u02/app/oracle/adf_silent.rsp -jreLoc /usr && \
@@ -124,7 +127,10 @@ RUN mkdir -p /tmp/adf && \
 
 # Install Oracle HTTP Server
 ADD ohs_silent.rsp /u02/app/oracle/ohs_silent.rsp
-ADD ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip
+
+RUN wget --no-check-certificate --content-disposition "https://googledrive.com/host/0B8N4NF6Fi1ZubjVpM01mek9kcWs" -O /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip
+#ADD ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip
+
 RUN mkdir -p /tmp/ohs && \
  unzip /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip -d /tmp/ohs && \
  cd /tmp/ohs/Disk1 && \
@@ -132,3 +138,19 @@ RUN mkdir -p /tmp/ohs && \
  rm /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip && \
  rm -r /tmp/ohs
 
+################
+#USER root
+#ADD basicWLSDomain_AdminServer.py /u02/app/oracle/product/fmw/wlserver_10.3/common/templates/scripts/wlst/
+
+#RUN /bin/bash -c "source /u02/app/oracle/product/fmw/wlserver_10.3/server/bin/setWLSEnv.sh" \
+#    && /u02/app/oracle/product/fmw/wlserver_10.3/common/bin/wlst.sh /u02/app/oracle/product/fmw/wlserver_10.3/common/templates/scripts/wlst/basicWLSDomain_AdminServer.py
+
+#ADD change_weblogic_password.sh /u02/app/oracle/product/fmw/
+
+#ADD entrypoint.sh /u02/app/oracle/product/fmw/
+
+#RUN [ "chmod", "a+x", "/u02/app/oracle/product/fmw/change_weblogic_password.sh", "/u02/app/oracle/product/fmw/entrypoint.sh" ]
+
+#ENTRYPOINT [ "/u02/app/oracle/product/fmw/entrypoint.sh", "AdminServer" ]
+
+#EXPOSE 7001
