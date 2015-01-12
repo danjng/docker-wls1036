@@ -107,11 +107,17 @@ RUN downloaded_weblogic_sha1sum=$(sha1sum /u02/app/oracle/wls1036_generic.jar);\
 
 # Install Oracle ADF
 ADD adf_silent.rsp /u02/app/oracle/adf_silent.rsp
+ADD createCentralInventory.sh /u02/app/oracle/createCentralInventory.sh
 ADD ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip
+USER root
+RUN mkdir /u01 && \
+ chmod 755 /u02/app/oracle/createCentralInventory.sh && \
+ /u02/app/oracle/createCentralInventory.sh /u01/oraInventory oinstall
+USER oracle
 RUN mkdir -p /tmp/adf && \
  unzip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip -d /tmp/adf && \
  cd /tmp/adf/Disk1 && \
- ./runInstaller -silent -response /u02/app/oracle/adf_silent.rsp && \
+ ./runInstaller -silent -response /u02/app/oracle/adf_silent.rsp -jreLoc /usr && \
  rm /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip && \
  rm -r /tmp/adf
 
@@ -121,7 +127,7 @@ ADD ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip /u02/app/oracle/ofm_webtier_l
 RUN mkdir -p /tmp/ohs && \
  unzip /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip -d /tmp/ohs && \
  cd /tmp/ohs/Disk1 && \
- ./runInstaller -silent -responseFile /u02/app/oracle/ohs_silent.rsp && \
+ ./runInstaller -silent -responseFile /u02/app/oracle/ohs_silent.rsp -jreLoc /usr && \
  rm /u02/app/oracle/ofm_webtier_linux_11.1.1.7.0_64_disk1_1of1.zip && \
  rm -r /tmp/ohs
 
