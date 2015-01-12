@@ -115,6 +115,7 @@ RUN mkdir /u01 && \
  /u02/app/oracle/createCentralInventory.sh /u01/oraInventory oinstall
 USER oracle
 RUN mkdir -p /tmp/adf && \
+ mkdir -p /u03/app/oracle/config/{domains,applications}
  unzip /u02/app/oracle/ofm_appdev_generic_11.1.1.7.0_disk1_1of1.zip -d /tmp/adf && \
  cd /tmp/adf/Disk1 && \
  ./runInstaller -silent -response /u02/app/oracle/adf_silent.rsp -jreLoc /usr && \
